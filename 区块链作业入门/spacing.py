@@ -5,7 +5,7 @@ import time
 
 for ctrl_idx in range(1, 5):
     gp_name = "nodes_21"#这个测试组名称的group name
-    spacing = 10*ctrl_idx #spacing 区块间隔,秒为单位
+    spacing = 10*ctrl_idx #spacing 区块间隔,秒为单位（我认为就是每隔多久产生一个区块）
     interval = 50 #interval 几个区块重算一次难度
     ctn_amount = 20 #几个节点，即container的数量
     nw_delay = 0 #nw_delay 网络延迟（毫秒）
@@ -169,7 +169,7 @@ for ctrl_idx in range(1, 5):
         while tail in fine_blks:
             tail = leaf2prev[tail] 
         mainh = hh[hhk] - hh[tail] #次数差值
-        print ts_name, mainh, len(fine_blks)
+        print ts_name, mainh, len(fine_blks) #测试名称 增长最快的分支所增长的长度(high increased of highest chain) 监视窗口内总共生成了多少个区块的数目(total blocks generated)
         with open("{}/result.log".format(gp_path), 'a') as fp:
             fp.write("{}\t{}\t{}\n".format(ts_name, mainh, len(fine_blks)))
 
@@ -189,14 +189,43 @@ print "Group: {} finished".format(gp_name)
 http://8btc.com/article-1702-1.html
 
 addnode这一选项的作用是啥？固定了自己监听的端口号了吗？如何允许自己连接他人，如何允许他人连接自己？
+答案：每个节点至少会连接其他8个节点(主动+被动)，被动连接监听固定端口：8233，主动连接的时候是随机选取端口。
+真实网络中也是有种子节点的，只是不止一个，自己做的时候可以考虑多加一些种子节点哈(但是基于什么策略加呢)。
+
 起了这么多容器，作用是不是就是挖矿啊，其他比特币网络中的行为其实都没有模拟？
+答案：是。自己可以考虑再加一些行为。比如交易。
+
 check network established中我写的注释对吗？
-outbound+inbound-disconnect < 2这个公式哪里来的？
+答案：对。
+
+outbound+inbound-disconnect < 2这个公式哪里来的？  
+答案：自己定义的。outbound——主动连接的数量 inbound——被动连接的数量 disconnect——之前建立的连接被取消的数量(节点数目>50才会发生)
+
 为什么 len(actual_span) < 3，难度就不收敛？是因为数目太少吗，数目<3的话一定不稳定吗？理论依据是？
+答案：自定义的 真实网络中不需要考虑——真实网络中默认难度已经收敛了，因为真实比特币系统已经运行了很久，难度是否收敛这件事情只在比特币系统刚刚运行的时候需要考虑。
+由于我们模拟的这个系统是从头开始，因此一开始难度是不收敛的，因此需要等待收敛。
+
 为什么要这么设置：actual_span = [0,]？
+答案：第一个元素可以为任意值，陈辰设置的是只要倒数第一个和倒数第二个的难度和目标值差距不大(百分25)，就认为难度收敛。难度收敛之后，才开始监控的。
+
 128行代码睡眠时间的设定有什么含义吗？
-146行代码为什么hash只能出现一次？
+答案：只是在等待LOG写入，其实没有必要是time_window*1.05，设置time_window+30就可以————认为30s内就可以写入文件完毕。参看161行代码，会明白time_window是如何起作用的。
+
+146行代码为什么hash只能出现一次？ 
+答案：在测试哈希碰撞，其实没有什么意义。
+
 172行代码的这几个数据说明了什么？
+
+bitcoin命令行和官方的比，可以接受哪些可变参数？ 
+答案：自己 --h 查看即可。
+
+time_window和spacing的关系，time_bias根据什么设置为200？
+
+种子节点是随机选取的吗？我要想多加几个种子节点的话，种子节点需要满足什么策略呢？
+
+
+
+
 
 
 
